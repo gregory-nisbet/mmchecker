@@ -1,0 +1,4 @@
+# bin directory for ad hoc utilities related to developing this package.
+/bin/
+# This is where the makefile drops this file
+/mmchecker
