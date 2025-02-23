@@ -13,6 +13,7 @@ func parseString(content string) [][]string {
 	if err != nil {
 		panic(err)
 	}
+
 	return out
 }
 
@@ -22,10 +23,12 @@ func parseFile(path string) ([][]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("parseFile: %w", err)
 	}
+
 	out, err := parse(fh)
 	if err != nil {
 		return nil, fmt.Errorf("parseFile: %w", err)
 	}
+
 	return out, nil
 }
 
@@ -35,11 +38,14 @@ func parse(content io.Reader) ([][]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("parse: %w", err)
 	}
+
 	lines := strings.Split(string(bytes), "\n")
-	out := make([][]string, len(lines), len(lines))
+	out := make([][]string, len(lines))
+
 	for i, line := range lines {
 		parsedLine := strings.Fields(line)
 		out[i] = parsedLine
 	}
+
 	return out, nil
 }

@@ -17,7 +17,7 @@ func TestParse(t *testing.T) {
 		{
 			name:   "empty",
 			input:  "",
-			output: [][]string{[]string{}},
+			output: [][]string{{}},
 			errPat: "",
 		},
 		{
@@ -50,6 +50,7 @@ func TestParse(t *testing.T) {
 
 func TestParseString(t *testing.T) {
 	t.Parallel()
+
 	if e := makeDiff(parseString("a b c d e f g")[0], strings.Fields("a b c d e f g")); e != nil {
 		t.Error(e)
 	}

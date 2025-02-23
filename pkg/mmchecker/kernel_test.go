@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// TestReadComment tests reading a comment and skipping past it
+// TestReadComment tests reading a comment and skipping past it.
 func TestReadComment(t *testing.T) {
 	t.Parallel()
 
@@ -48,7 +48,7 @@ func TestReadComment(t *testing.T) {
 	}
 }
 
-// TestSkipBlankLines tests skipping blank lines
+// TestSkipBlankLines tests skipping blank lines.
 func TestSkipBlankLines(t *testing.T) {
 	t.Parallel()
 
@@ -59,7 +59,7 @@ func TestSkipBlankLines(t *testing.T) {
 	}
 }
 
-// TestSkipBlankLines tests skipping blank lines when nothing should be done
+// TestSkipBlankLines tests skipping blank lines when nothing should be done.
 func TestSkipBlankLines_Noop(t *testing.T) {
 	t.Parallel()
 
@@ -84,12 +84,12 @@ func TestReadComment_SingleTest(t *testing.T) {
 	parsed := parseString(input)
 
 	if e := makeDiff(parsed, [][]string{
-		[]string{},
-		[]string{"$("},
-		[]string{"multi-"},
-		[]string{"line"},
-		[]string{"comment"},
-		[]string{"$)"},
+		{},
+		{"$("},
+		{"multi-"},
+		{"line"},
+		{"comment"},
+		{"$)"},
 	}); e != nil {
 		t.Error(e)
 	}
@@ -97,11 +97,11 @@ func TestReadComment_SingleTest(t *testing.T) {
 	trimmed := skipBlankLines(parsed)
 
 	if e := makeDiff(trimmed, [][]string{
-		[]string{"$("},
-		[]string{"multi-"},
-		[]string{"line"},
-		[]string{"comment"},
-		[]string{"$)"},
+		{"$("},
+		{"multi-"},
+		{"line"},
+		{"comment"},
+		{"$)"},
 	}); e != nil {
 		t.Error(e)
 	}
@@ -110,6 +110,7 @@ func TestReadComment_SingleTest(t *testing.T) {
 	if e := errContains(err, ""); e != nil {
 		t.Error(e)
 	}
+
 	if e := makeDiff(combinedLength(advanced), 0); e != nil {
 		t.Error(e)
 	}
@@ -120,8 +121,8 @@ func TestProcessConstant_HappyPath(t *testing.T) {
 	t.Parallel()
 
 	k := newKernel()
-	err := processConstant(k, 1, "foo")
 
+	err := processConstant(k, 1, "foo")
 	if err != nil {
 		t.Error(err)
 	}
@@ -132,14 +133,14 @@ func TestProcessVariable_HappyPath(t *testing.T) {
 	t.Parallel()
 
 	k := newKernel()
-	err := processVariable(k, 1, "foo")
 
+	err := processVariable(k, 1, "foo")
 	if err != nil {
 		t.Error(err)
 	}
 }
 
-// TestProcessAxiom_HappyPath tests adding an axiom to the kernel state
+// TestProcessAxiom_HappyPath tests adding an axiom to the kernel state.
 func TestProcessAxiom_HappyPath(t *testing.T) {
 	t.Parallel()
 

@@ -14,12 +14,15 @@ func TestFindFirstInstanceOf_SimpleTest(t *testing.T) {
 	if isOnePastEnd {
 		t.Errorf("isOnePastEnd should not be true")
 	}
+
 	if e := makeDiff(rowIndex, 0); e != nil {
 		t.Error(e)
 	}
+
 	if e := makeDiff(tokenIndex, 5); e != nil {
 		t.Error(e)
 	}
+
 	if e := errContains(err, ""); e != nil {
 		t.Error(e)
 	}
@@ -52,7 +55,7 @@ func TestFindFirstInstanceOf(t *testing.T) {
 			tokenIndex: 4,
 		},
 		{
-			name:       "walk after comment comment",
+			name:       "walk after comment",
 			tokens:     parseString("$( a b c $) d e f"),
 			item:       "$)",
 			walk:       2,
@@ -70,12 +73,15 @@ func TestFindFirstInstanceOf(t *testing.T) {
 			if e := makeDiff(rowIndex, tt.rowIndex); e != nil {
 				t.Error(e)
 			}
+
 			if e := makeDiff(tokenIndex, tt.tokenIndex); e != nil {
 				t.Error(e)
 			}
+
 			if e := makeDiff(onePastEnd, tt.onePastEnd); e != nil {
 				t.Error(e)
 			}
+
 			if e := errContains(err, tt.errPat); e != nil {
 				t.Error(e)
 			}

@@ -15,6 +15,7 @@ func makeDiff[T any](got T, want T) error {
 	if diff := cmp.Diff(want, got); diff != "" {
 		return fmt.Errorf("unexpected diff (-want +got): %s", diff)
 	}
+
 	return nil
 }
 
@@ -23,19 +24,24 @@ func errContains(e error, msg string) error {
 		if msg == "" {
 			return nil
 		}
+
 		return fmt.Errorf("expected error containing %q", msg)
 	}
+
 	content := e.Error()
 	if content == "" {
 		panic("non-nil error stringifies to empty string!")
 	}
+
 	if msg == "" {
 		return fmt.Errorf("unexpected error: %w", e)
 	}
+
 	if strings.Contains(content, msg) {
 		return nil
 	}
-	return fmt.Errorf("error %q does not contain %q", e, msg)
+
+	return fmt.Errorf("error %w does not contain %q", e, msg)
 }
 
 func must(e error) {

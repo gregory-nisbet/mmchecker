@@ -1,0 +1,106 @@
+linters:
+  disable:
+    # This thing is still under development. I'm not ready to turn on
+    # unused checking.
+    - unused
+    # tenv is deprecated
+    - tenv
+    # go version 1.19 is too old
+    - copyloopvar
+    - intrange
+    # I need to think about how to configure this.
+    - varnamelen
+    # I need to test the private API.
+    - testpackage
+    # address this later
+    - revive
+    # Remove fmt.Printf and friends later
+    - forbidigo
+    # Enable this later, not right now
+    - exhaustruct
+    # meh
+    - depguard
+    # long lines are okay
+    - lll
+    - unparam
+    - cyclop
+    - stylecheck
+
+  enable:
+    - asasalint
+    - bidichk
+    - decorder
+    - dogsled
+    - dupl
+    - dupword
+    - errcheck
+    - errchkjson
+    - errorlint
+    - exhaustive
+    - fatcontext
+    - funlen
+    - funlen
+    - gci
+    - ginkgolinter
+    - gocheckcompilerdirectives
+    - gochecknoinits
+    - gochecksumtype
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - godox
+    - gofmt
+    - gofumpt
+    - goheader
+    - goimports
+    - gomoddirectives
+    - gomodguard
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - gosmopolitan
+    - govet
+    - grouper
+    - iface
+    - importas
+    - inamedparam
+    - ineffassign
+    - interfacebloat
+    - ireturn
+    - loggercheck
+    - maintidx
+    - makezero
+    - misspell
+    - mnd
+    - musttag
+    - nakedret
+    - nestif
+    - nilnil
+    - nlreturn
+    - noctx
+    - nolintlint
+    - nonamedreturns
+    - paralleltest
+    - perfsprint
+    - prealloc
+    - predeclared
+    - promlinter
+    - protogetter
+    - reassign
+    - recvcheck
+    - rowserrcheck
+    - sloglint
+    - spancheck
+    - staticcheck
+    - tagalign
+    - tagliatelle
+    - testifylint
+    - thelper
+    - unconvert
+    - usestdlibvars
+    - usetesting
+    - whitespace
+    - wrapcheck
+    - wsl
