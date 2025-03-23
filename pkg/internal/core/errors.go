@@ -2,7 +2,14 @@ package core
 
 import (
 	"errors"
+	"io"
 )
+
+var EOF error = io.EOF
+
+func IsEOF(e error) bool {
+	return errors.Is(e, io.EOF)
+}
 
 type IOError struct {
 	err error

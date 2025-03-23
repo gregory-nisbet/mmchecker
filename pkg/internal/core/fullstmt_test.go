@@ -9,3 +9,11 @@ func TestIsHypothesis(t *testing.T) {
 		t.Error("IsHypothesis failed")
 	}
 }
+
+func TestIsAssertion(t *testing.T) {
+	t.Parallel()
+
+	if !IsAssertion(FullStmt{SType: "$a"}) {
+		t.Error("IsHypothesis failed")
+	}
+}

@@ -2,8 +2,18 @@ package core
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 )
+
+func TestEOF(t *testing.T) {
+	t.Parallel()
+
+	wrappedError := fmt.Errorf("wrapped error: %w", EOF)
+	if !IsEOF(wrappedError) {
+		t.Error("IsEOF failed")
+	}
+}
 
 func TestIOError(t *testing.T) {
 	t.Parallel()

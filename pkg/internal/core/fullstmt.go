@@ -14,3 +14,11 @@ func IsHypothesis(stmt FullStmt) bool {
 	}
 	return false
 }
+
+func IsAssertion(stmt FullStmt) bool {
+	switch stmt.SType {
+	case "$a", "$p":
+		return true
+	}
+	return false
+}
