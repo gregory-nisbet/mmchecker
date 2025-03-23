@@ -7,7 +7,7 @@ import (
 
 type Symbols string
 
-func ToSymbols(symbols []string) string {
+func ToSymbols(symbols []string) Symbols {
 	for _, msg := range symbols {
 		for _, ch := range msg {
 			switch ch {
@@ -16,9 +16,9 @@ func ToSymbols(symbols []string) string {
 			}
 		}
 	}
-	return strings.Join(symbols, "\n")
+	return Symbols(strings.Join(symbols, "\n"))
 }
 
-func FromSymbols(symbols string) []string {
-	return strings.Split(symbols, "\n")
+func FromSymbols(symbols Symbols) []string {
+	return strings.Split(string(symbols), "\n")
 }
