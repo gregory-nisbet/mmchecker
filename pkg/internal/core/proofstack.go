@@ -6,6 +6,10 @@ type ProofStack struct {
 	data []Stmt
 }
 
+func NewProofStack() *ProofStack {
+	return &ProofStack{}
+}
+
 func (stack *ProofStack) TreatStep(mm *MM, step *FullStmt) error {
 	Vprint(10, "Proof step:", fmt.Sprintf("%v", step))
 	if IsHypothesis(*step) {
