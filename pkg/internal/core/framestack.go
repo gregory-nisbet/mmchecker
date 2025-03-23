@@ -20,6 +20,9 @@ const GO = 1
 const STOP = 2
 
 func (self *FrameStack) Foreach(callback func(f *Frame) int8) {
+	if self == nil {
+		panic("framestack cannot be nil")
+	}
 	for i := -1 + len(self.Frames); i >= 0; i-- {
 		frame := self.Frames[i]
 		status := callback(frame)

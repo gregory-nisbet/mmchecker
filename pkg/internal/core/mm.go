@@ -18,6 +18,7 @@ func NewMM(beginLabel *Label) *MM {
 		Constants:    map[string]TUnit{},
 		Labels:       map[Label]FullStmt{},
 		VerifyProofs: beginLabel == nil,
+		FS:           NewFrameStack(),
 	}
 }
 
@@ -64,4 +65,20 @@ func (self *MM) AddF(typecode string, va string, label Label) error {
 	})
 	frame.FLabels[va] = label
 	return nil
+}
+
+// *Symbol, *Var, *Const
+func (self *MM) LookupSymbolByName(tok string) (*string, *string, *string) {
+	isActiveVar := self.FS.LookupV(tok)
+	_, isConstant := self.Constants[tok]
+	switch {
+	case isActiveVar && isConstant:
+		panic(fmt.Sprintf("string %q is both var and const", tok))
+	case isActiveVar:
+		return &tok, &tok, nil
+	case isConstant:
+		return &tok, nil, &tok
+	default:
+		return nil, nil, nil
+	}
 }
