@@ -82,3 +82,45 @@ func (self *MM) LookupSymbolByName(tok string) (*string, *string, *string) {
 		return nil, nil, nil
 	}
 }
+
+// endToken is "$=" or "$.".
+// endToken shouldn't be a string this function is too general.
+func (self *MM) ReadStmtAux(stmttype string, toks *Toks, endToken string) (Stmt, error) {
+	Assert(endToken == "$=" || endToken == "$.", `endToken is $. or $=`)
+	var stmt Stmt
+	tok, err := toks.Readc()
+	if err != nil {
+		return nil, fmt.Errorf("failed to readc: %w", err)
+	}
+	for tok != "" && tok != endToken {
+		// What do we do if the symbol doesn't exist?
+		sym, va, constant := self.LookupSymbolByName(tok)
+		// Validate active symbol.
+		switch stmttype {
+		case "$d", "$e", "$a", "$p":
+			if va == nil && constant == nil {
+				return nil, MMError{fmt.Errorf("Token %q is not an active symbol", tok)}
+			}
+		}
+		// Validate symbol typed by hypothesis.
+		switch stmttype {
+		case "$e", "$a", "$p":
+			if va != nil && self.FS.LookupF(*va) == nil {
+				return nil, MMError{fmt.Errorf("Variable %q in %s-statement is not typed by an active $f-statement", tok, stmttype)}
+			}
+		}
+		stmt = append(stmt, *sym)
+		tok, err = toks.Readc()
+		if err != nil {
+			return nil, fmt.Errorf("failed to readc in processing loop: %w", err)
+		}
+	}
+	if tok == "" {
+		return nil, MMError{fmt.Errorf("Unclosed %q-statement at the end of file", stmttype)}
+	}
+	if tok != endToken {
+		panic("tok must equal endToken")
+	}
+	Vprint(20, "Statement:", stmt.String())
+	return stmt, nil
+}
