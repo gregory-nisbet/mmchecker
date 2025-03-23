@@ -20,7 +20,7 @@ func (stack *ProofStack) TreatStep(mm *MM, step *FullStmt) error {
 	dvs0 := assertion.Dvs
 	fhyps0 := assertion.F
 	ehyps0 := assertion.E
-	// conclusion0 := assertion.S
+	conclusion0 := assertion.S
 	npop := len(fhyps0) + len(ehyps0)
 	sp := len(stack.data) - npop
 	if sp < 0 {
@@ -50,7 +50,21 @@ func (stack *ProofStack) TreatStep(mm *MM, step *FullStmt) error {
 		x := p.First
 		y := p.Second
 		Vprint(16, "dist", x, y, subst[x].String(), subst[y].String())
-		panic("not yet implemented")
+		xVars := mm.FS.FindVars(subst[x])
+		yVars := mm.FS.FindVars(subst[y])
+		for x0, _ := range xVars {
+			for y0, _ := range yVars {
+				if x0 == y0 {
+					return MMError{fmt.Errorf("new disjoint violation: %q", x0)}
+				}
+				if !mm.FS.LookupD(x0, y0) {
+					return MMError{fmt.Errorf("variables %q and %q are not known to be disjoint", x0, y0)}
+				}
+			}
+		}
 	}
-	panic("not yet implemented")
+	stack.data = stack.data[:len(stack.data)-npop]
+	newStmt := ApplySubst(conclusion0, subst)
+	stack.data = append(stack.data, newStmt)
+	return nil
 }
