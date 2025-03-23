@@ -17,7 +17,7 @@ type ScanCloser struct {
 
 func NewScanCloser(path string, tokens [][]string) (*ScanCloser, error) {
 	if path != "" && len(tokens) != 0 {
-		return nil, &MMError{errors.New("ScanCloser can either be in memory or from a path on disk, not both")}
+		return nil, MMError{errors.New("ScanCloser can either be in memory or from a path on disk, not both")}
 	}
 	if len(tokens) != 0 {
 		return &ScanCloser{
@@ -27,7 +27,7 @@ func NewScanCloser(path string, tokens [][]string) (*ScanCloser, error) {
 	}
 	fh, err := os.Open(path)
 	if err != nil {
-		return nil, &IOError{err}
+		return nil, IOError{err}
 	}
 	return &ScanCloser{
 		path:    path,
