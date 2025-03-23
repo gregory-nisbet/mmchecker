@@ -1,13 +1,16 @@
 package core
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 type MM struct {
 	BeginLabel   *Label
 	EndLabel     *Label
 	Constants    map[string]struct{}
 	FS           *FrameStack
-	Labels       map[Label]FullStmt
+	Labels       map[Label]*FullStmt
 	VerifyProofs bool
 }
 
@@ -16,7 +19,7 @@ func NewMM(beginLabel *Label) *MM {
 		BeginLabel:   beginLabel,
 		EndLabel:     nil,
 		Constants:    map[string]TUnit{},
-		Labels:       map[Label]FullStmt{},
+		Labels:       map[Label]*FullStmt{},
 		VerifyProofs: beginLabel == nil,
 		FS:           NewFrameStack(),
 	}
@@ -28,6 +31,18 @@ func (self *MM) AddC(tok string) error {
 		return MMError{fmt.Errorf("constant %q already declared", tok)}
 	}
 	self.Constants[tok] = struct{}{}
+	return nil
+}
+
+func (self *MM) AddV(tok string) error {
+	if self.FS.LookupV(tok) {
+		return MMError{fmt.Errorf("variable %q already declared and active", tok)}
+	}
+	frame := self.FS.LastFrame()
+	if frame == nil {
+		panic("impossible: frame stack is empty")
+	}
+	frame.V[tok] = struct{}{}
 	return nil
 }
 
@@ -123,4 +138,116 @@ func (self *MM) ReadStmtAux(stmttype string, toks *Toks, endToken string) (Stmt,
 	}
 	Vprint(20, "Statement:", stmt.String())
 	return stmt, nil
+}
+
+func (self *MM) ReadNonPStatement(stmttype string, toks *Toks) (Stmt, error) {
+	return self.ReadStmtAux(stmttype, toks, "$.")
+}
+
+func (self *MM) ReadPStatement(toks *Toks) (Stmt, Stmt, error) {
+	stmt, err := self.ReadStmtAux("$p", toks, "$=")
+	if err != nil {
+		return nil, nil, fmt.Errorf("read $= aux statment in p statement: %w", err)
+	}
+	proof, err := self.ReadStmtAux("$=", toks, "$.")
+	if err != nil {
+		return nil, nil, fmt.Errorf("read $. aux statement in p statement: %w", err)
+	}
+	return stmt, proof, nil
+}
+
+func (self *MM) Read(toks *Toks) error {
+	self.FS.Push()
+	var label *Label
+	tok, err := toks.Readc()
+	if err != nil {
+		return fmt.Errorf("readc: %w", err)
+	}
+	for tok != "" && tok != "$}" {
+		switch tok {
+		case "$c":
+			stmt, err := self.ReadNonPStatement(tok, toks)
+			if err != nil {
+				return fmt.Errorf("read non-p statement: %w", err)
+			}
+			for _, w := range stmt {
+				if err := self.AddC(w); err != nil {
+					return fmt.Errorf("addc: %w", err)
+				}
+			}
+		case "$v":
+			stmt, err := self.ReadNonPStatement(tok, toks)
+			if err != nil {
+				return fmt.Errorf("read non-p statement in $v: %w", err)
+			}
+			for _, w := range stmt {
+				if err := self.AddV(w); err != nil {
+					return fmt.Errorf("add variable $v: %w", err)
+				}
+			}
+		case "$f":
+			stmt, err := self.ReadNonPStatement(tok, toks)
+			if err != nil {
+				return MMError{fmt.Errorf("read statement in $f: %w", err)}
+			}
+			if label == nil {
+				return MMError{fmt.Errorf("$f must have label (statement: %s)", stmt.String())}
+			}
+			if len(stmt) != 2 {
+				return MMError{fmt.Errorf("$f must have length 2 but is %v", stmt.String())}
+			}
+			if err := self.AddF(stmt[0], stmt[1], *label); err != nil {
+				return MMError{fmt.Errorf("$f: %w", err)}
+			}
+			self.Labels[*label] = (&FullStmt{
+				SType: "$f",
+				MStmt: &stmt,
+			}).Check()
+			label = nil
+		case "$e":
+			if label == nil {
+				return MMError{errors.New("$e must have label")}
+			}
+			stmt, err := self.ReadNonPStatement(tok, toks)
+			if err != nil {
+				return MMError{fmt.Errorf("$e failed to read: %w", err)}
+			}
+			self.FS.AddE(stmt, *label)
+			self.Labels[*label] = (&FullStmt{
+				SType: "$e",
+				MStmt: &stmt,
+			}).Check()
+			label = nil
+		case "$a":
+			if label == nil {
+				return MMError{errors.New("$a must have label")}
+			}
+			stmt, err := self.ReadNonPStatement(tok, toks)
+			if err != nil {
+				return fmt.Errorf("reading statement in $a: %w", err)
+			}
+			assertion := self.FS.MakeAssertion(stmt)
+			self.Labels[*label] = (&FullStmt{
+				SType:      "$a",
+				MAssertion: &assertion,
+			})
+			label = nil
+		case "$p":
+			if label == nil {
+				return MMError{errors.New("label cannot be new in $p statement")}
+			}
+			_, _, err := self.ReadPStatement(toks)
+			if err != nil {
+				return fmt.Errorf("$p failed to read statement: %w", err)
+			}
+			if self.VerifyProofs {
+				Vprint(2, "Verify:", string(*label))
+				panic("not yet implemented")
+				// self.Verify
+			}
+			panic("not yet implemented")
+			label = nil
+		}
+	}
+	panic("not yet implemented")
 }
