@@ -238,20 +238,61 @@ func (self *MM) Read(toks *Toks) error {
 			if label == nil {
 				return MMError{errors.New("label cannot be new in $p statement")}
 			}
-			_, _, err := self.ReadPStatement(toks)
+			stmt, proof, err := self.ReadPStatement(toks)
 			if err != nil {
 				return fmt.Errorf("$p failed to read statement: %w", err)
 			}
+			assertion := self.FS.MakeAssertion(stmt)
 			if self.VerifyProofs {
 				Vprint(2, "Verify:", string(*label))
-				panic("not yet implemented")
-				// self.Verify
+				if err := self.Verify(assertion.F, assertion.E, assertion.S, proof); err != nil {
+					return fmt.Errorf("verification error: %w", err)
+				}
 			}
-			panic("not yet implemented")
+			self.Labels[*label] = (&FullStmt{
+				SType:      "$p",
+				MAssertion: &assertion,
+			}).Check()
 			label = nil
+		case "$d":
+			stmt, err := self.ReadNonPStatement(tok, toks)
+			if err != nil {
+				return fmt.Errorf("$d: %w", err)
+			}
+			self.FS.AddD(stmt)
+		case "${":
+			if err := self.Read(toks); err != nil {
+				return fmt.Errorf("${: %w", err)
+			}
+		case "$)":
+			return errors.New("Unexpected $) while not within a comment")
+		default:
+			if tok[0] != '$' {
+				_, ok := self.Labels[Label(tok)]
+				if ok {
+					return fmt.Errorf("tok %q multiply defined", tok)
+				}
+				l := Label(tok)
+				label = &l
+				Vprint(20, "Label:", tok)
+				if self.EndLabel != nil && *label == *self.EndLabel {
+					// This is terrible. I need a better way to do this.
+					panic("SUCCESS")
+				}
+				if self.BeginLabel != nil && *label == *self.BeginLabel {
+					self.VerifyProofs = true
+				}
+			} else {
+				return fmt.Errorf("unknown token: %q", tok)
+			}
+		}
+		tok, err = toks.Readc()
+		if err != nil {
+			return fmt.Errorf("reading tok: %w", err)
 		}
 	}
-	panic("not yet implemented")
+	self.FS.Pop()
+	return nil
 }
 
 func (self *MM) Verify(fHyps []Fhyp, eHyps []Ehyp, conclusion Stmt, proof []string) error {

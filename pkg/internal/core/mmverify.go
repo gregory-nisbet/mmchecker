@@ -38,6 +38,11 @@ import (
 	"os"
 )
 
+func CheckString(content string) error {
+	mm := NewMM(nil)
+	return mm.CheckString(content)
+}
+
 func main() {
 	Vprint(1, "mmverify.go -- port of mmverifier.py")
 	mm := NewMM(nil)

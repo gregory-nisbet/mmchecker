@@ -16,6 +16,10 @@ func (self *FrameStack) Push() {
 	self.Frames = append(self.Frames, NewFrame())
 }
 
+func (self *FrameStack) Pop() {
+	self.Frames = self.Frames[:-1+len(self.Frames)]
+}
+
 const GO = 1
 const STOP = 2
 
