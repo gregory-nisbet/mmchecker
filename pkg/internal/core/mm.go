@@ -3,6 +3,8 @@ package core
 import (
 	"errors"
 	"fmt"
+	"os"
+	"strings"
 )
 
 type MM struct {
@@ -253,36 +255,38 @@ func (self *MM) Read(toks *Toks) error {
 }
 
 func (self *MM) Verify(fHyps []Fhyp, eHyps []Ehyp, conclusion Stmt, proof []string) error {
-	stack := NewProofStack()
+	var stack *ProofStack = NewProofStack()
+	var err error = nil
 	if len(proof) == 0 {
 		return MMError{errors.New("proof is empty")}
 	}
 	if proof[0] == "(" {
-		if err := self.TreatCompressedProof(fHyps, eHyps, proof, &stack); err != nil {
-			return err.AddTag(1530)
+		if stack, err = TreatCompressedProof(self, fHyps, eHyps, proof); err != nil {
+			return fmt.Errorf("treating compressed proof: %w", err)
 		}
 	} else {
-		if err := self.TreatNormalProof(proof, &stack); err != nil {
-			return err.AddTag(1540)
+		if stack, err = TreatNormalProof(self, proof); err != nil {
+			return fmt.Errorf("treating normal proof: %w", err)
 		}
 	}
-	Vprint(10, "Stack at end of proof:", stack)
-	if len(stack) == 0 {
-		return MMError("Empty stack at end of proof").AddTag(1550)
+	Assert(stack != nil, "Proof stack cannot be nil after this point")
+	Vprint(10, "Stack at end of proof:", fmt.Sprintf("%v", stack))
+	if len(stack.data) == 0 {
+		return MMError{errors.New("Empty stack at end of proof")}
 	}
-	if len(stack) > 1 {
-		return MMError(fmt.Sprintf(
+	if len(stack.data) > 1 {
+		return MMError{fmt.Errorf(
 			"Stack has more than one entry at the end of the proof (top entry %v) proved assertion %v",
-			stack[0],
+			stack.data[0],
 			conclusion,
-		)).AddTag(1560)
+		)}
 	}
-	if stack[0].Equals(&conclusion) {
-		return MMError(fmt.Sprintf(
+	if stack.data[0].Equals(conclusion) {
+		return MMError{fmt.Errorf(
 			"Stack entry %v does not match proved asserion %v",
-			stack[0],
+			stack.data[0],
 			conclusion,
-		)).AddTag(1570)
+		)}
 	}
 	Vprint(3, "Correct proof!")
 	return nil
@@ -292,32 +296,15 @@ func (self *MM) Dump() {
 	fmt.Fprintf(os.Stdout, "%v\n", self.Labels)
 }
 
-func (self *MM) CheckString(content string) *Error {
+func (self *MM) CheckString(content string) error {
 	tokens := strings.Fields(content)
 	input := [][]string{tokens}
 	toks, err := NewToks("", input)
 	if err != nil {
-		return err.AddTag(1561)
+		return fmt.Errorf("checking string: newtoks: %w", err)
 	}
 	if err := self.Read(toks); err != nil {
-		return err.AddTag(1562)
-	}
-	return nil
-}
-
-func (self *MM) Dump() {
-	fmt.Fprintf(os.Stdout, "%v\n", self.Labels)
-}
-
-func (self *MM) CheckString(content string) *Error {
-	tokens := strings.Fields(content)
-	input := [][]string{tokens}
-	toks, err := NewToks("", input)
-	if err != nil {
-		return err.AddTag(1561)
-	}
-	if err := self.Read(toks); err != nil {
-		return err.AddTag(1562)
+		return fmt.Errorf("checking string: reading: %w", err)
 	}
 	return nil
 }

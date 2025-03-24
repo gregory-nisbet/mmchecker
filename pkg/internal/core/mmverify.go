@@ -33,9 +33,14 @@
 // (gn 23-Mar-2025) ported to Go.
 package core
 
+import (
+	"fmt"
+	"os"
+)
+
 func main() {
 	Vprint(1, "mmverify.go -- port of mmverifier.py")
-	mm := NewMM(nil, nil)
+	mm := NewMM(nil)
 	dbFile := os.Args[1]
 	toks, err := NewToks(dbFile, nil)
 	if err != nil {

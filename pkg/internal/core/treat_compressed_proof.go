@@ -3,6 +3,7 @@ package core
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -46,9 +47,9 @@ func TreatCompressedProof(mm *MM, fhyps []Fhyp, ehyps []Ehyp, proof []string) (*
 	compressedProof := strings.Join(proof[idxBloc+1:], "")
 	Vprint(5, "Referenced labels:", fmt.Sprintf("%v", plabels))
 	labelEnd := len(plabels)
-	Vprint(5, "Number of referenced labels:", string(labelEnd))
+	Vprint(5, "Number of referenced labels:", strconv.Itoa(labelEnd))
 	Vprint(5, "Compressed proof steps:", compressedProof)
-	Vprint(5, "Number of steps", string(len(compressedProof)))
+	Vprint(5, "Number of steps", strconv.Itoa(len(compressedProof)))
 	proofInts := []int{}
 	curInt := 0
 	for _, ch := range compressedProof {
