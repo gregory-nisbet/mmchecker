@@ -251,3 +251,73 @@ func (self *MM) Read(toks *Toks) error {
 	}
 	panic("not yet implemented")
 }
+
+func (self *MM) Verify(fHyps []Fhyp, eHyps []Ehyp, conclusion Stmt, proof []string) error {
+	stack := NewProofStack()
+	if len(proof) == 0 {
+		return MMError{errors.New("proof is empty")}
+	}
+	if proof[0] == "(" {
+		if err := self.TreatCompressedProof(fHyps, eHyps, proof, &stack); err != nil {
+			return err.AddTag(1530)
+		}
+	} else {
+		if err := self.TreatNormalProof(proof, &stack); err != nil {
+			return err.AddTag(1540)
+		}
+	}
+	Vprint(10, "Stack at end of proof:", stack)
+	if len(stack) == 0 {
+		return MMError("Empty stack at end of proof").AddTag(1550)
+	}
+	if len(stack) > 1 {
+		return MMError(fmt.Sprintf(
+			"Stack has more than one entry at the end of the proof (top entry %v) proved assertion %v",
+			stack[0],
+			conclusion,
+		)).AddTag(1560)
+	}
+	if stack[0].Equals(&conclusion) {
+		return MMError(fmt.Sprintf(
+			"Stack entry %v does not match proved asserion %v",
+			stack[0],
+			conclusion,
+		)).AddTag(1570)
+	}
+	Vprint(3, "Correct proof!")
+	return nil
+}
+
+func (self *MM) Dump() {
+	fmt.Fprintf(os.Stdout, "%v\n", self.Labels)
+}
+
+func (self *MM) CheckString(content string) *Error {
+	tokens := strings.Fields(content)
+	input := [][]string{tokens}
+	toks, err := NewToks("", input)
+	if err != nil {
+		return err.AddTag(1561)
+	}
+	if err := self.Read(toks); err != nil {
+		return err.AddTag(1562)
+	}
+	return nil
+}
+
+func (self *MM) Dump() {
+	fmt.Fprintf(os.Stdout, "%v\n", self.Labels)
+}
+
+func (self *MM) CheckString(content string) *Error {
+	tokens := strings.Fields(content)
+	input := [][]string{tokens}
+	toks, err := NewToks("", input)
+	if err != nil {
+		return err.AddTag(1561)
+	}
+	if err := self.Read(toks); err != nil {
+		return err.AddTag(1562)
+	}
+	return nil
+}
