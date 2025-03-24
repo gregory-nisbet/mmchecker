@@ -344,8 +344,12 @@ func (self *MM) CheckString(content string) error {
 	if err != nil {
 		return fmt.Errorf("checking string: newtoks: %w", err)
 	}
-	if err := self.Read(toks); err != nil {
-		return fmt.Errorf("checking string: reading: %w", err)
+	err = self.Read(toks)
+	if err == nil {
+		return nil
 	}
-	return nil
+	if IsEOF(err) {
+		return nil
+	}
+	return fmt.Errorf("checking string: reading: %w", err)
 }

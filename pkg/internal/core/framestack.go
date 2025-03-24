@@ -42,6 +42,9 @@ func (self *FrameStack) Foreach(callback func(f *Frame) int8) {
 }
 
 func (self *FrameStack) LastFrame() *Frame {
+	if len(self.Frames) == 0 {
+		self.Push()
+	}
 	out := self.Frames[-1+len(self.Frames)]
 	return out
 }

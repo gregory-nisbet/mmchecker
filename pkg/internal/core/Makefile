@@ -1,3 +1,6 @@
 test:
 	go fmt ./...
 	go test ./...
+
+tags:
+	ctags-universal -R .
